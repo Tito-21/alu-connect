@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import '../models/app_user.dart';
 import '../services/auth_service.dart';
+import '../services/firestore_service.dart';
 
 /// Holds the currently signed-in user. Any widget wrapped in a Consumer
 /// or using context.watch<AuthProvider>() rebuilds automatically the
@@ -8,10 +10,12 @@ import '../services/auth_service.dart';
 /// you need to demo live.
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
+  final FirestoreService _firestoreService = FirestoreService();
 
   AppUser? _currentUser;
   bool _isLoading = false;
   String? _errorMessage;
+  StreamSubscription? _userSub;
 
   AppUser? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
@@ -33,6 +37,7 @@ class AuthProvider extends ChangeNotifier {
         role: role,
       );
       _errorMessage = null;
+      _listenToUserDoc(_currentUser!.uid);
       _setLoading(false);
       return true;
     } catch (e) {
@@ -47,6 +52,7 @@ class AuthProvider extends ChangeNotifier {
     try {
       _currentUser = await _authService.signIn(email: email, password: password);
       _errorMessage = null;
+      _listenToUserDoc(_currentUser!.uid);
       _setLoading(false);
       return true;
     } catch (e) {
@@ -56,8 +62,30 @@ class AuthProvider extends ChangeNotifier {
     }
   }
 
+  /// Keeps [currentUser] live-synced with Firestore. This means bookmarking
+  /// an opportunity (or any future profile edit) updates every screen
+  /// watching AuthProvider instantly, with no manual refresh needed.
+  void _listenToUserDoc(String uid) {
+    _userSub?.cancel();
+    _userSub = _firestoreService.watchUser(uid).listen((user) {
+      _currentUser = user;
+      notifyListeners();
+    });
+  }
+
+  Future<void> toggleSavedOpportunity(String opportunityId) async {
+    final user = _currentUser;
+    if (user == null) return;
+    final isSaving = !user.savedOpportunities.contains(opportunityId);
+    await _firestoreService.toggleSavedOpportunity(user.uid, opportunityId, isSaving);
+    // No need to manually update local state -- the Firestore listener
+    // above will push the updated list back automatically.
+  }
+
   Future<void> signOut() async {
     await _authService.signOut();
+    await _userSub?.cancel();
+    _userSub = null;
     _currentUser = null;
     notifyListeners();
   }
@@ -75,5 +103,11 @@ class AuthProvider extends ChangeNotifier {
     }
     if (msg.contains('weak-password')) return 'Password should be at least 6 characters.';
     return 'Something went wrong. Please try again.';
+  }
+
+  @override
+  void dispose() {
+    _userSub?.cancel();
+    super.dispose();
   }
 }

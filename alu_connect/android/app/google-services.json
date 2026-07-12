@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "690102906466",
+    "project_id": "test-680fd",
+    "storage_bucket": "test-680fd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690102906466:android:9092cc0c1aa4a29fc1ab3b",
+        "android_client_info": {
+          "package_name": "com.example.alu_connect"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD204h1jwaJhAcymV5_1evGAFn1VMs9qX4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

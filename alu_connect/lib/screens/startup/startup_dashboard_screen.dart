@@ -7,7 +7,7 @@ import '../../services/firestore_service.dart';
 import '../../theme/app_theme.dart';
 import 'applicants_screen.dart';
 import 'post_opportunity_screen.dart';
-
+import '../../providers/application_provider.dart';
 /// Home base for a startup account: shows verification status and the
 /// list of opportunities they've posted, each tappable to see applicants.
 class StartupDashboardScreen extends StatelessWidget {
@@ -24,7 +24,10 @@ class StartupDashboardScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => context.read<AuthProvider>().signOut(),
+            onPressed: () {
+              context.read<ApplicationProvider>().clear();
+              context.read<AuthProvider>().signOut();
+               },
           ),
         ],
       ),

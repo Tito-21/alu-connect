@@ -12,6 +12,7 @@ class ApplicationProvider extends ChangeNotifier {
   List<Application> _applications = [];
   StreamSubscription? _sub;
   bool _isLoading = true;
+  String? _currentStudentId;
 
   List<Application> get applications => _applications;
   bool get isLoading => _isLoading;
@@ -22,8 +23,14 @@ class ApplicationProvider extends ChangeNotifier {
   }
 
   void listenForStudent(String studentId) {
+    if (_currentStudentId == studentId) return;
+
     _sub?.cancel();
+    _currentStudentId = studentId;
+    _applications = [];
     _isLoading = true;
+    notifyListeners();
+
     _sub = _service.watchApplicationsByStudent(studentId).listen((data) {
       _applications = data;
       _isLoading = false;
@@ -31,6 +38,15 @@ class ApplicationProvider extends ChangeNotifier {
     });
   }
 
+  /// Call this on sign-out so the next account starts with a clean slate.
+  void clear() {
+    _sub?.cancel();
+    _sub = null;
+    _applications = [];
+    _currentStudentId = null;
+    _isLoading = true;
+    notifyListeners();
+  }
   Future<void> apply({
     required String opportunityId,
     required String opportunityTitle,

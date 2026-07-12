@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/application_provider.dart';
+import '../providers/auth_provider.dart';
 import '../screens/student/home_screen.dart';
 import '../screens/student/applications_screen.dart';
 import '../screens/student/profile_screen.dart';
 import '../theme/app_theme.dart';
 
-/// Wraps the student's Home / Applications / Profile screens in one
-/// bottom-navigation shell, same pattern as the sample UI's tab bar.
 class StudentNavShell extends StatefulWidget {
   const StudentNavShell({super.key});
 
@@ -21,6 +22,17 @@ class _StudentNavShellState extends State<StudentNavShell> {
     ApplicationsScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final uid = context.read<AuthProvider>().currentUser?.uid;
+      if (uid != null) {
+        context.read<ApplicationProvider>().listenForStudent(uid);
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {

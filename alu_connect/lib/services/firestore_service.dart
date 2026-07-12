@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/app_user.dart';
 import '../models/opportunity.dart';
 import '../models/application.dart';
 import '../models/startup.dart';
@@ -32,9 +33,6 @@ class FirestoreService {
     return _db.collection('opportunities').doc(opp.id).set(opp.toMap());
   }
 
-  /// Real-time stream of all open opportunities -- this is what makes the
-  /// "Recent opportunities" list update instantly for every student without
-  /// them refreshing the app.
   Stream<List<Opportunity>> watchOpenOpportunities() {
     return _db
         .collection('opportunities')
@@ -90,5 +88,21 @@ class FirestoreService {
 
   Future<void> updateApplicationStatus(String appId, String status) {
     return _db.collection('applications').doc(appId).update({'status': status});
+  }
+
+  // ---------- SAVED OPPORTUNITIES (bookmarking) ----------
+
+  Stream<AppUser> watchUser(String uid) {
+    return _db.collection('users').doc(uid).snapshots().map(
+        (doc) => AppUser.fromMap(uid, doc.data() ?? {}));
+  }
+
+  Future<void> toggleSavedOpportunity(String uid, String opportunityId, bool isSaving) {
+    final ref = _db.collection('users').doc(uid);
+    return ref.update({
+      'savedOpportunities': isSaving
+          ? FieldValue.arrayUnion([opportunityId])
+          : FieldValue.arrayRemove([opportunityId]),
+    });
   }
 }

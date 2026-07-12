@@ -84,10 +84,12 @@ class _HomeScreenState extends State<HomeScreen> {
                   padding: const EdgeInsets.only(bottom: 12),
                   child: OpportunityCard(
                     opportunity: opp,
+                    isBookmarked: auth.currentUser?.savedOpportunities.contains(opp.id) ?? false,
+                    onBookmarkTap: () => context.read<AuthProvider>().toggleSavedOpportunity(opp.id),
                     onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => OpportunityDetailScreen(opportunity: opp)),
+                    MaterialPageRoute(builder: (_) => OpportunityDetailScreen(opportunity: opp)),
                     ),
-                  ),
+                    ),
                 )),
         ],
       ),

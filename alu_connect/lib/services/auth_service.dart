@@ -17,10 +17,9 @@ class AuthService {
     required String password,
     required String role,
   }) async {
-    final cred = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
+    final cred = await _auth
+        .createUserWithEmailAndPassword(email: email, password: password)
+        .timeout(const Duration(seconds: 15));
 
     final user = AppUser(
       uid: cred.user!.uid,
@@ -30,7 +29,11 @@ class AuthService {
     );
 
     // Create the matching user profile document in Firestore.
-    await _db.collection('users').doc(user.uid).set(user.toMap());
+    await _db
+        .collection('users')
+        .doc(user.uid)
+        .set(user.toMap())
+        .timeout(const Duration(seconds: 15));
     return user;
   }
 
@@ -38,11 +41,14 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final cred = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    final doc = await _db.collection('users').doc(cred.user!.uid).get();
+    final cred = await _auth
+        .signInWithEmailAndPassword(email: email, password: password)
+        .timeout(const Duration(seconds: 15));
+    final doc = await _db
+        .collection('users')
+        .doc(cred.user!.uid)
+        .get()
+        .timeout(const Duration(seconds: 15));
     return AppUser.fromMap(cred.user!.uid, doc.data() ?? {});
   }
 

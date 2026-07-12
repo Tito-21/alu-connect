@@ -8,6 +8,7 @@ class AppUser {
   final String role; // 'student' or 'startup'
   final List<String> skills;
   final String location;
+  final List<String> savedOpportunities;
 
   AppUser({
     required this.uid,
@@ -16,6 +17,7 @@ class AppUser {
     required this.role,
     this.skills = const [],
     this.location = '',
+    this.savedOpportunities = const [],
   });
 
   factory AppUser.fromMap(String uid, Map<String, dynamic> data) {
@@ -26,6 +28,7 @@ class AppUser {
       role: data['role'] ?? 'student',
       skills: List<String>.from(data['skills'] ?? []),
       location: data['location'] ?? '',
+      savedOpportunities: List<String>.from(data['savedOpportunities'] ?? []),
     );
   }
 
@@ -36,6 +39,7 @@ class AppUser {
       'role': role,
       'skills': skills,
       'location': location,
+      'savedOpportunities': savedOpportunities,
     };
   }
 }
